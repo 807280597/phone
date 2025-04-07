@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品详情</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        ul {
+            list-style: none;
+        }
+        
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .btn:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        
+        /* 头部样式 */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            color: #007bff;
+            margin: 0;
+        }
+        
+        nav ul {
+            display: flex;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+        }
+        
+        nav ul li a {
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 5px;
+        }
+        
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #007bff;
+            transition: width 0.3s ease;
+        }
+        
+        nav ul li a:hover::after,
+        nav ul li a.active::after {
+            width: 100%;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* 产品详情页样式 */
+        .product-detail {
+            padding: 120px 0 80px;
+            background-color: #fff;
+        }
+        
+        .product-detail-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: start;
+        }
+        
+        /* 产品图片轮播 */
+        .product-gallery {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .gallery-main {
+            height: 400px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .gallery-main img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        
+        .gallery-main img.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .gallery-thumbs {
+            display: flex;
+            margin-top: 15px;
+            gap: 10px;
+        }
+        
+        .gallery-thumb {
+            width: 80px;
+            height: 80px;
+            border-radius: 5px;
+            overflow: hidden;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        
+        .gallery-thumb:hover,
+        .gallery-thumb.active {
+            opacity: 1;
+            box-shadow: 0 0 0 2px #007bff;
+        }
+        
+        .gallery-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        
+        .gallery-nav:hover {
+            background-color: #fff;
+        }
+        
+        .gallery-prev {
+            left: 15px;
+        }
+        
+        .gallery-next {
+            right: 15px;
+        }
+        
+        /* 产品信息 */
+        .product-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .product-category {
+            display: inline-block;
+            padding: 5px 15px;
+            background-color: #e9f5ff;
+            color: #007bff;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        
+        .product-description {
+            margin-bottom: 30px;
+            color: #555;
+            line-height: 1.8;
+        }
+        
+        .product-features-list {
+            margin-bottom: 30px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #e9f5ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: #007bff;
+        }
+        
+        .feature-text h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .feature-text p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        /* 产品规格 */
+        .product-specs {
+            margin-top: 50px;
+        }
+        
+        .specs-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .specs-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: #007bff;
+        }
+        
+        .specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        
+        .specs-table tr {
+            border-bottom: 1px solid #eee;
+        }
+        
+        .specs-table tr:last-child {
+            border-bottom: none;
+        }
+        
+        .specs-table th,
+        .specs-table td {
+            padding: 15px 10px;
+            text-align: left;
+        }
+        
+        .specs-table th {
+            width: 40%;
+            color: #666;
+            font-weight: normal;
+        }
+        
+        .specs-table td {
+            font-weight: 500;
+        }
+        
+        /* 返回按钮 */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 30px;
+            color: #007bff;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn i {
+            margin-right: 8px;
+        }
+        
+        .back-btn:hover {
+            transform: translateX(-5px);
+        }
+        
+        /* 页脚样式 */
+        footer {
+            background-color: #222;
+            color: #fff;
+            padding: 70px 0 20px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .footer-logo h2 {
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+        
+        .footer-links h3,
+        .footer-social h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-links h3::after,
+        .footer-social h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background-color: #007bff;
+        }
+        
+        .footer-links ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links ul li a:hover {
+            color: #007bff;
+        }
+        
+        .social-icons {
+            display: flex;
+        }
+        
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: #333;
+            border-radius: 50%;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            background-color: #007bff;
+            transform: translateY(-5px);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .product-detail-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .gallery-main {
+                height: 350px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            nav {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 80%;
+                height: calc(100vh - 70px);
+                background-color: #fff;
+                transition: left 0.3s ease;
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            nav.active {
+                left: 0;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                padding: 30px;
+            }
+            
+            nav ul li {
+                margin: 0 0 20px 0;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .gallery-main {
+                height: 300px;
+            }
+            
+            .gallery-thumb {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .product-info h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        /* 动画 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="logo.svg" alt="PhoneX Logo" height="40">
+                </a>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="index.html#products" class="active">产品</a></li>
+                    <li><a href="index.html#about">关于我们</a></li>
+                    <li><a href="index.html#contact">联系方式</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <section class="product-detail">
+        <div class="container">
+            <a href="index.html#products" class="back-btn">
+                <i class="fas fa-arrow-left"></i> 返回产品列表
+            </a>
+            
+            <div class="product-detail-container">
+                <!-- 产品图片轮播 -->
+                <div class="product-gallery">
+                    <div class="gallery-main">
+                        <img src="https://via.placeholder.com/600x600" alt="产品图片1" class="active" id="product-image-1">
+                        <img src="https://via.placeholder.com/600x600" alt="产品图片2" id="product-image-2">
+                        <img src="https://via.placeholder.com/600x600" alt="产品图片3" id="product-image-3">
+                        <img src="https://via.placeholder.com/600x600" alt="产品图片4" id="product-image-4">
+                    </div>
+                    <div class="gallery-nav gallery-prev">
+                        <i class="fas fa-chevron-left"></i>
+                    </div>
+                    <div class="gallery-nav gallery-next">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="gallery-thumbs">
+                        <div class="gallery-thumb active" data-image="product-image-1">
+                            <img src="https://via.placeholder.com/600x600" alt="缩略图1">
+                        </div>
+                        <div class="gallery-thumb" data-image="product-image-2">
+                            <img src="https://via.placeholder.com/600x600" alt="缩略图2">
+                        </div>
+                        <div class="gallery-thumb" data-image="product-image-3">
+                            <img src="https://via.placeholder.com/600x600" alt="缩略图3">
+                        </div>
+                        <div class="gallery-thumb" data-image="product-image-4">
+                            <img src="https://via.placeholder.com/600x600" alt="缩略图4">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 产品信息 -->
+                <div class="product-info">
+                    <span class="product-category" id="product-category">旗舰系列</span>
+                    <h1 id="product-title">X Pro Max</h1>
+                    <p class="product-description" id="product-description">
+                        顶级旗舰手机，搭载最新处理器，6.7英寸超视网膜XDR显示屏，提供卓越的视觉体验。专业级摄像系统，捕捉每一个精彩瞬间。强大的电池续航，满足一整天的使用需求。
+                    </p>
+                    
+                    <div class="product-features-list">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-microchip"></i>
+                            </div>
+                            <div class="feature-text">
+                                <h3>强劲性能</h3>
+                                <p id="feature-processor">搭载骁龙8 Gen 2处理器，12GB RAM，提供流畅的多任务处理能力</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                            <div class="feature-text">
+                                <h3>专业摄影</h3>
+                                <p id="feature-camera">5000万像素主摄 + 1200万像素超广角 + 1000万像素长焦，支持8K视频录制</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-battery-full"></i>
+                            </div>
+                            <div class="feature-text">
+                                <h3>持久续航</h3>
+                                <p id="feature-battery">5000mAh大容量电池，支持65W快充，30分钟充电70%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 产品规格 -->
+            <div class="product-specs">
+                <h2 class="specs-title">产品规格</h2>
+                <table class="specs-table">
+                    <tr>
+                        <th>处理器</th>
+                        <td id="spec-processor">骁龙8 Gen 2</td>
+                    </tr>
+                    <tr>
+                        <th>内存</th>
+                        <td id="spec-ram">12GB LPDDR5X</td>
+                    </tr>
+                    <tr>
+                        <th>存储</th>
+                        <td id="spec-storage">512GB UFS 4.0</td>
+                    </tr>
+                    <tr>
+                        <th>屏幕</th>
+                        <td id="spec-display">6.7英寸 AMOLED，2K+ 分辨率，120Hz自适应刷新率</td>
+                    </tr>
+                    <tr>
+                        <th>前置摄像头</th>
+                        <td id="spec-front-camera">3200万像素，支持4K视频录制</td>
+                    </tr>
+                    <tr>
+                        <th>后置摄像头</th>
+                        <td id="spec-rear-camera">5000万像素主摄 + 1200万像素超广角 + 1000万像素长焦</td>
+                    </tr>
+                    <tr>
+                        <th>电池</th>
+                        <td id="spec-battery">5000mAh，支持65W有线快充，50W无线快充</td>
+                    </tr>
+                    <tr>
+                        <th>操作系统</th>
+                        <td id="spec-os">Android 13</td>
+                    </tr>
+                    <tr>
+                        <th>尺寸</th>
+                        <td id="spec-dimensions">162.9 x 76.5 x 8.9 mm</td>
+                    </tr>
+                    <tr>
+                        <th>重量</th>
+                        <td id="spec-weight">228g</td>
+                    </tr>
+                    <tr>
+                        <th>防水防尘</th>
+                        <td id="spec-waterproof">IP68</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>PhoneShowcase</h2>
+                    <p>创新科技，尽在掌握</p>
+                </div>
+                <div class="footer-links">
+                    <h3>快速链接</h3>
+                    <ul>
+                        <li><a href="index.html">首页</a></li>
+                        <li><a href="index.html#products">产品</a></li>
+                        <li><a href="index.html#about">关于我们</a></li>
+                        <li><a href="index.html#contact">联系方式</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h3>关注我们</h3>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-weixin"></i></a>
+                        <a href="#"><i class="fab fa-weibo"></i></a>
+                        <a href="#"><i class="fab fa-qq"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 PhoneShowcase. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+        
+        // 获取URL参数
+        function getUrlParams() {
+            const params = {};
+            const queryString = window.location.search.substring(1);
+            const pairs = queryString.split('&');
+            
+            for (let i = 0; i < pairs.length; i++) {
+                const pair = pairs[i].split('=');
+                params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+            }
+            
+            return params;
+        }
+        
+        // 产品数据
+        const products = {
+            'x-pro-max': {
+                category: '旗舰系列',
+                title: 'X Pro Max',
+                description: '顶级旗舰手机，搭载最新处理器，6.7英寸超视网膜XDR显示屏，提供卓越的视觉体验。专业级摄像系统，捕捉每一个精彩瞬间。强大的电池续航，满足一整天的使用需求。',
+                features: {
+                    processor: '搭载骁龙8 Gen 2处理器，12GB RAM，提供流畅的多任务处理能力',
+                    camera: '5000万像素主摄 + 1200万像素超广角 + 1000万像素长焦，支持8K视频录制',
+                    battery: '5000mAh大容量电池，支持65W快充，30分钟充电70%'
+                },
+                specs: {
+                    processor: '骁龙8 Gen 2',
+                    ram: '12GB LPDDR5X',
+                    storage: '512GB UFS 4.0',
+                    display: '6.7英寸 AMOLED，2K+ 分辨率，120Hz自适应刷新率',
+                    frontCamera: '3200万像素，支持4K视频录制',
+                    rearCamera: '5000万像素主摄 + 1200万像素超广角 + 1000万像素长焦',
+                    battery: '5000mAh，支持65W有线快充，50W无线快充',
+                    os: 'Android 13',
+                    dimensions: '162.9 x 76.5 x 8.9 mm',
+                    weight: '228g',
+                    waterproof: 'IP68'
+                },
+                images: [
+                    'https://via.placeholder.com/600x600',
+                    'https://via.placeholder.com/600x600',
+                    'https://via.placeholder.com/600x600',
+                    'https://via.placeholder.com/600x600'
+                ]
+            },
+            'x-pro': {
+                category: '旗舰系列',
+                title: 'X Pro',
+                description: '专业摄影旗舰，四摄系统，6.5英寸AMOLED高刷屏，为摄影爱好者打造的专业级手机。轻薄机身设计，握感舒适，随时随地捕捉精彩瞬间。',
+                features: {
+                    processor: '搭载骁龙8 Gen 2处理器，8GB RAM，高效处理各类应用',
+                    camera: '4800万像素主摄 + 1200万像素超广角 + 800万像素长焦，专业摄影模式',
+                    battery: '4800mAh电池，支持50W快充，无线充电15W'
+                },
+                specs: {
+                    processor: '骁龙8 Gen 2',
+                    ram: '8GB LPDDR5',
+                    storage: '256GB UFS 3.1',
+                    display: '6.5英寸 AMOLED，FHD+ 分辨率，120Hz刷新率',
+                    frontCamera: '2400万像素，支持4K视频录制',
+                    rearCamera: '4800万像素主摄 + 1200万像素超广角 + 800万像素长焦',
+                    battery: '4800mAh，支持50W有线快充，15W无线充电',
+                    os: 'Android 13',
+                    dimensions: '158.5 x 73.2 x 8.2 mm',
+                    weight: '198g',
+                    waterproof: 'IP68'
+                },
+                images: [
+                    'https://via.placeholder.com/600x600',
+                    'https://via.placeholder.com/600x600',
+                    'https://via.placeholder.com/600x600',
+                    'https://via.placeholder.com/600x600'
+                ]
+            },
+            'm-series-plus': {
+                category: '中端系列',
+                title: 'M Series Plus',
+                description: '中端性能之选，6.4英寸FHD+屏幕，长续航。均衡的性能与实用功能，满足日常使用需求。大容量电池，让您一整天无需担心电量问题。',
+                features: {
+                    processor: '搭载天玑8100处理器，8GB RAM，流畅运行主流应用',
+                    camera: '6400万像素主摄 + 800万像素超广角，AI场景识别',
+                    battery: '5000mAh大电池，支持33W快充'
+                },
+                specs: {
+                    processor: '天玑8100',
+                    ram: '8GB LPDDR4X',
+                    storage: '128GB UFS 3.1',
+                    display: '6.4英寸 LCD，FHD+ 分辨率，90Hz刷新率',
+                    frontCamera: '1600万像素',
+                    rearCamera: '6400万像素主摄 + 800万像素超广角 + 200万像素微距',
+                    battery: '5000mAh，支持33W快充',
+                    os: 'Android 12',
+                    dimensions: '160.3 x 74.5 x 8.5 mm',
+                    weight: '190g',
+                    waterproof: 'IP53'
+                },
+                images: [
+                    'https://via.placeholder.com/600x600',
+                    'https://via.placeholder.com/600x600',
+                    'https://via.placeholder.com/600x600',
+                    'https://via.placeholder.com/600x600'
+                ]
+            },
+            'm-series': {
+                category: '中端系列',
+                title: 'M Series',
+                description: '轻薄设计，6.2英寸
