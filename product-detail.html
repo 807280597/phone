@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品详情 - GetPhoneHub.com</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* 导航栏样式 */
+        header {
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        header:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .nav-links a {
+            color: #333;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            font-size: 1.2rem;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #007bff;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .nav-links a:hover:after {
+            width: 100%;
+        }
+        
+        .nav-links a:hover {
+            color: #007bff;
+        }
+
+        .btn-login:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .btn-register:hover {
+            background-color: #0056b3;
+        }
+
+        .customer-service {
+            transition: color 0.3s ease;
+        }
+        
+        .customer-service:hover {
+            color: #0056b3;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        
+        .logo i {
+            font-size: 1.8rem;
+        }
+        
+        .logo span {
+            font-weight: bold;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .nav-links {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+        
+        .nav-links a {
+            color: #333;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .nav-links a:hover {
+            color: #007bff;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .customer-service {
+            color: #007bff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+
+        .btn-login, .btn-register {
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-login {
+            background-color: transparent;
+            border: 2px solid #007bff;
+            color: #007bff;
+        }
+        
+        .btn-register {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+        }
+        
+        .product-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .product-card .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .product-card .product-info {
+            padding: 15px;
+        }
+        
+        .product-card .product-title {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        
+        .product-card .product-price {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        /* 产品详情样式 */
+        .product-detail {
+            padding: 100px 0 50px;
+        }
+
+        .product-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .product-gallery {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .main-image-container {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 400px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .thumbnail {
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 5px;
+        }
+
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 5px;
+        }
+
+        .thumbnail:hover {
+            border-color: #007bff;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .product-price {
+            font-size: 1.8rem;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .product-description {
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        /* 删除这些按钮相关的样式 */
+        /* 删除这些样式 */
+                /* 删除以下所有按钮相关样式 */
+                
+        .product-actions {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .btn-action {
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid #007bff;
+            color: #007bff;
+        }
+
+        /* 规格参数 */
+        .product-specs {
+            margin-top: 50px;
+        }
+
+        .specs-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .spec-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .spec-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        /* 相关推荐 */
+        .related-products {
+            margin-top: 50px;
+        }
+
+        .related-title {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(280px, 320px));
+            gap: 30px;
+            margin-top: 20px;
+            justify-content: start;  /* 添加左对齐 */
+        }
+
+        /* 修改产品卡片样式以保持一致性 */
+        .related-grid .product-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .related-grid .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .related-grid .product-image {
+            width: 100%;
+            height: 280px;
+            object-fit: contain;
+            background: #f8f9fa;
+            padding: 20px;
+        }
+        
+        .related-grid .product-info {
+            padding: 20px;
+        }
+        
+        .related-grid .product-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .related-grid .product-price {
+            font-size: 1.3rem;
+            color: #007bff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- 先加载配置文件 -->
+    <script src="config/product-detail-config.js"></script>
+    
+    <!-- 移动客服模态框到 body 下 -->
+    <div id="customerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCustomerModal()">&times;</span>
+            <h2>联系客服</h2>
+            <div class="customer-info">
+                <p>在线时间：周一至周日 9:00-22:00</p>
+                <p>客服热线：400-xxx-xxxx</p>
+            </div>
+            <form id="messageForm" onsubmit="return handleMessage(event)">
+                <div class="form-group">
+                    <input type="text" id="contactInfo" placeholder="请输入您的手机号/邮箱" required>
+                </div>
+                <div class="form-group">
+                    <textarea id="messageContent" placeholder="请描述您的问题..." rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn-primary">提交留言</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加模态框通用样式 -->
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1001;
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>GetPhoneHub</span>
+                </a>
+                <div class="nav-links">
+                    <script>
+                        // 动态生成导航菜单
+                        document.write(
+                            productDetailConfig.navMenu.map(item => 
+                                `<a href="${item.link}">${item.text}</a>`
+                            ).join('')
+                        );
+                    </script>
+                </div>
+                <div class="auth-buttons">
+                    <button class="btn-login" onclick="showModal('login')">登录</button>
+                    <button class="btn-register" onclick="showModal('register')">注册</button>
+                    <!-- 在 header 部分的客服链接修改为 -->
+                    <a href="#" class="customer-service" onclick="showCustomerModal()">
+                        <i class="fas fa-headset"></i>
+                        客服
+                    </a>
+                    <!-- 删除这里重复的客服模态框代码 -->
+                </div>
+            </div>
+        </header>
+    
+        <section class="product-detail">
+            <div class="container">
+                <div class="product-main">
+                    <div class="product-gallery">
+                        <div class="main-image-container">
+                            <img src="https://via.placeholder.com/600x600/f8f9fa/007bff?text=主图" alt="产品主图" class="main-image">
+                        </div>
+                        <div class="thumbnail-grid">
+                            <img src="https://via.placeholder.com/150x150/f8f9fa/007bff?text=缩略图1" alt="缩略图1" class="thumbnail">
+                            <img src="https://via.placeholder.com/150x150/f8f9fa/007bff?text=缩略图2" alt="缩略图2" class="thumbnail">
+                            <img src="https://via.placeholder.com/150x150/f8f9fa/007bff?text=缩略图3" alt="缩略图3" class="thumbnail">
+                            <img src="https://via.placeholder.com/150x150/f8f9fa/007bff?text=缩略图4" alt="缩略图4" class="thumbnail">
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h1 class="product-title">产品名称</h1>
+                        <div class="product-price">¥ XX,XXX</div>
+                        <div class="product-description">
+                            <p>产品详细描述内容...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-specs">
+                    <h2 class="specs-title">规格参数</h2>
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <div class="spec-label">处理器</div>
+                            <div class="spec-value">处理器型号</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">内存</div>
+                            <div class="spec-value">内存大小</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">存储</div>
+                            <div class="spec-value">存储容量</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">屏幕</div>
+                            <div class="spec-value">屏幕参数</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">摄像头</div>
+                            <div class="spec-value">摄像头参数</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">电池</div>
+                            <div class="spec-value">电池容量</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="related-products">
+                    <h2 class="related-title">相关推荐</h2>
+                    <div class="related-grid">
+                        <div class="product-card">
+                            <img src="https://via.placeholder.com/300x400/f8f9fa/007bff?text=推荐产品1" alt="推荐产品1" class="product-image">
+                            <div class="product-info">
+                                <h3 class="product-title">推荐产品1</h3>
+                                <div class="product-price">¥ XX,XXX</div>
+                            </div>
+                        </div>
+                        <div class="product-card">
+                            <img src="https://via.placeholder.com/300x400/f8f9fa/007bff?text=推荐产品2" alt="推荐产品2" class="product-image">
+                            <div class="product-info">
+                                <h3 class="product-title">推荐产品2</h3>
+                                <div class="product-price">¥ XX,XXX</div>
+                            </div>
+                        </div>
+                        <div class="product-card">
+                            <img src="https://via.placeholder.com/300x400/f8f9fa/007bff?text=推荐产品3" alt="推荐产品3" class="product-image">
+                            <div class="product-info">
+                                <h3 class="product-title">推荐产品3</h3>
+                                <div class="product-price">¥ XX,XXX</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // 获取URL中的产品ID
+                const urlParams = new URLSearchParams(window.location.search);
+                const productId = urlParams.get('id');
+                
+                // 获取产品配置
+                const product = productDetailConfig.products[productId];
+                if (product) {
+                    // 更新主图
+                    const mainImage = document.querySelector('.main-image');
+                    mainImage.src = product.mainImage;
+                    
+                    // 更新缩略图
+                    const thumbnailGrid = document.querySelector('.thumbnail-grid');
+                    thumbnailGrid.innerHTML = product.thumbnails.map((thumb, index) => `
+                        <img src="${thumb}" alt="缩略图${index + 1}" class="thumbnail" data-index="${index}">
+                    `).join('');
+                    
+                    // 添加缩略图点击事件
+                    const thumbnails = document.querySelectorAll('.thumbnail');
+                    
+                    // 图片切换函数
+                    function switchImage(index) {
+                        const targetThumb = thumbnails[index];
+                        if (!targetThumb) return;
+                        
+                        // 更新主图
+                        mainImage.src = targetThumb.src;
+                        
+                        // 更新选中状态
+                        thumbnails.forEach(t => t.style.borderColor = 'transparent');
+                        targetThumb.style.borderColor = '#007bff';
+                    }
+                    
+                    // 添加点击事件
+                    thumbnails.forEach((thumb, index) => {
+                        thumb.addEventListener('click', () => switchImage(index));
+                    });
+                    
+                    // 默认选中第一个缩略图
+                    if (thumbnails.length > 0) {
+                        switchImage(0);
+                    }
+                    
+                    // 更新产品标题和价格
+                    document.querySelector('.product-title').textContent = product.name;
+                    document.querySelector('.product-price').textContent = product.price;
+                    
+                    // 更新产品描述
+                    document.querySelector('.product-description p').textContent = product.description;
+                    
+                    // 更新规格参数
+                    const specsGrid = document.querySelector('.specs-grid');
+                    specsGrid.innerHTML = '';
+                    for (let [label, value] of Object.entries(product.specs)) {
+                        specsGrid.innerHTML += `
+                            <div class="spec-item">
+                                <div class="spec-label">${label}</div>
+                                <div class="spec-value">${value}</div>
+                            </div>
+                        `;
+                    }
+                    
+                    // 更新相关推荐
+                    const relatedGrid = document.querySelector('.related-grid');
+                    relatedGrid.innerHTML = product.recommendations.map(item => `
+                        <div class="product-card">
+                            <a href="product-detail.html?id=${item.id}" style="text-decoration: none; color: inherit;">
+                                <img src="${item.image}" alt="${item.name}" class="product-image">
+                                <div class="product-info">
+                                    <h3 class="product-title">${item.name}</h3>
+                                    <div class="product-price">${item.price}</div>
+                                </div>
+                            </a>
+                        </div>
+                    `).join('');
+                }
+            });
+        </script>
+    </body>
+    </html>
+
+    <!-- 添加登录模态框 -->
+    <!-- 修改登录模态框，添加记住密码选项 -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('login')">&times;</span>
+            <h2>登录</h2>
+            <form id="loginForm" onsubmit="return handleLogin(event)">
+                <div class="form-group">
+                    <input type="text" id="loginAccount" placeholder="手机号/邮箱" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" placeholder="密码" required>
+                </div>
+                <div class="form-group remember-me">
+                    <label>
+                        <input type="checkbox" id="rememberMe"> 记住密码
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary">登录</button>
+                <div class="switch-form">
+                    <span>还没有账号？</span>
+                    <a href="#" onclick="switchForm('register')">立即注册</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加样式 -->
+    <style>
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .remember-me label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+        
+        .remember-me input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+    </style>
+
+    <!-- 修改登录相关的JavaScript代码 -->
+    <script>
+        // 页面加载时检查是否有保存的登录信息
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedAccount = localStorage.getItem('savedAccount');
+            const savedPassword = localStorage.getItem('savedPassword');
+            
+            if (savedAccount && savedPassword) {
+                document.getElementById('loginAccount').value = savedAccount;
+                document.getElementById('loginPassword').value = savedPassword;
+                document.getElementById('rememberMe').checked = true;
+            }
+        });
+
+        // 修改处理登录的函数
+        function handleLogin(event) {
+            event.preventDefault();
+            const account = document.getElementById('loginAccount').value;
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            // 验证账号格式
+            if (!validateAccount(account)) {
+                alert('请输入正确的手机号或邮箱');
+                return false;
+            }
+
+            // 如果选择记住密码，保存到localStorage
+            if (rememberMe) {
+                localStorage.setItem('savedAccount', account);
+                localStorage.setItem('savedPassword', password);
+            } else {
+                // 如果取消记住密码，清除保存的信息
+                localStorage.removeItem('savedAccount');
+                localStorage.removeItem('savedPassword');
+            }
+
+            // TODO: 这里添加登录逻辑
+            console.log('登录信息:', { account, password, rememberMe });
+            closeModal('login');
+            return false;
+        }
+    </script>
+
+    <!-- 添加注册模态框 -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('register')">&times;</span>
+            <h2>注册</h2>
+            <form id="registerForm" onsubmit="return handleRegister(event)">
+                <div class="form-group">
+                    <input type="text" id="registerAccount" placeholder="手机号/邮箱" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPassword" placeholder="密码" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="confirmPassword" placeholder="确认密码" required>
+                </div>
+                <button type="submit" class="btn-primary">注册</button>
+                <div class="switch-form">
+                    <span>已有账号？</span>
+                    <a href="#" onclick="switchForm('login')">立即登录</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 在script标签中添加登录注册相关的JavaScript代码 -->
+    <script>
+        // 显示模态框
+        function showModal(type) {
+            document.getElementById(type + 'Modal').style.display = 'block';
+        }
+
+        // 关闭模态框
+        function closeModal(type) {
+            document.getElementById(type + 'Modal').style.display = 'none';
+        }
+
+        // 切换登录/注册表单
+        function switchForm(type) {
+            if (type === 'login') {
+                closeModal('register');
+                showModal('login');
+            } else {
+                closeModal('login');
+                showModal('register');
+            }
+        }
+
+        // 处理登录
+        function handleLogin(event) {
+            event.preventDefault();
+            const account = document.getElementById('loginAccount').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // 验证账号格式
+            if (!validateAccount(account)) {
+                alert('请输入正确的手机号或邮箱');
+                return false;
+            }
+
+            // TODO: 这里添加登录逻辑
+            console.log('登录信息:', { account, password });
+            closeModal('login');
+            return false;
+        }
+
+        // 处理注册
+        function handleRegister(event) {
+            event.preventDefault();
+            const account = document.getElementById('registerAccount').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPwd = document.getElementById('confirmPassword').value;
+
+            // 验证账号格式
+            if (!validateAccount(account)) {
+                alert('请输入正确的手机号或邮箱');
+                return false;
+            }
+
+            // 验证密码
+            if (password !== confirmPwd) {
+                alert('两次输入的密码不一致');
+                return false;
+            }
+
+            // TODO: 这里添加注册逻辑
+            console.log('注册信息:', { account, password });
+            closeModal('register');
+            return false;
+        }
+
+        // 验证账号格式(手机号或邮箱)
+        function validateAccount(account) {
+            const phoneRegex = /^1[3-9]\d{9}$/;
+            const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            return phoneRegex.test(account) || emailRegex.test(account);
+        }
+    </script>
