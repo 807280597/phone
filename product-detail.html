@@ -834,3 +834,106 @@
             return phoneRegex.test(account) || emailRegex.test(account);
         }
     </script>
+
+    <head>
+        <style>
+            /* 响应式设计 */
+            @media screen and (max-width: 768px) {
+                /* 导航栏调整 */
+                nav {
+                    flex-direction: column;
+                    padding: 0.5rem 0;
+                }
+                
+                .nav-links {
+                    flex-direction: column;
+                    width: 100%;
+                    padding: 10px 0;
+                }
+                
+                .nav-links a {
+                    width: 100%;
+                    text-align: center;
+                    padding: 10px 0;
+                    margin: 0;
+                }
+                
+                .auth-buttons {
+                    width: 100%;
+                    justify-content: center;
+                    padding: 10px 0;
+                }
+            
+            /* 产品详情页布局调整 */
+            .product-main {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .main-image {
+                height: 300px;
+            }
+            
+            .thumbnail-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            /* 规格参数调整 */
+            .specs-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            /* 相关推荐调整 */
+            .related-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            /* 按钮样式调整 */
+            .product-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn-action {
+                width: 100%;
+            }
+            
+            /* 文字大小调整 */
+            .product-title {
+                font-size: 1.5rem;
+            }
+            
+            .product-price {
+                font-size: 1.3rem;
+            }
+            
+            /* 模态框调整 */
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 20px;
+            }
+        }
+
+        /* 超小屏幕设备 */
+        @media screen and (max-width: 480px) {
+            .thumbnail-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .main-image {
+                height: 250px;
+            }
+
+            .product-title {
+                font-size: 1.3rem;
+            }
+
+            .product-price {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+    </head>

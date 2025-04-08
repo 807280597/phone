@@ -797,3 +797,129 @@
     </script>
 </body>
 </html>
+
+<style>
+    /* 响应式设计 */
+    @media screen and (max-width: 768px) {
+        /* 导航栏调整 */
+        nav {
+            flex-direction: column;
+            padding: 0.5rem;
+        }
+        
+        .nav-links {
+            flex-direction: column;
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            display: none; /* 默认隐藏导航菜单 */
+        }
+        
+        .nav-links.active {
+            display: flex; /* 点击汉堡菜单时显示 */
+        }
+        
+        .nav-links a {
+            width: 100%;
+            padding: 10px 0;
+            margin: 5px 0;
+        }
+        
+        .auth-buttons {
+            width: 100%;
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+        /* 添加汉堡菜单按钮 */
+        .menu-toggle {
+            display: block;
+            font-size: 1.5rem;
+            color: #007bff;
+            cursor: pointer;
+        }
+
+        /* 横幅区域调整 */
+        .hero {
+            padding: 80px 0 30px;
+            min-height: 400px;
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+        }
+
+        /* 产品网格调整 */
+        .product-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 10px;
+        }
+
+        .product-card {
+            max-width: 100%;
+        }
+
+        .product-image {
+            height: 200px;
+        }
+
+        /* 模态框调整 */
+        .modal-content {
+            width: 95%;
+            margin: 10% auto;
+            padding: 20px;
+        }
+
+        /* 页脚调整 */
+        .footer-content {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+    }
+
+    /* 超小屏幕设备 */
+    @media screen and (max-width: 480px) {
+        .hero h1 {
+            font-size: 1.8rem;
+        }
+
+        .hero p {
+            font-size: 1rem;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+        }
+
+        .product-price {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<!-- 在 nav 标签内添加汉堡菜单按钮 -->
+<nav>
+    <div class="nav-left">
+        <a href="index.html" class="logo">
+            <i class="fas fa-mobile-alt"></i>
+            <span>GetPhoneHub</span>
+        </a>
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </div>
+    </div>
+    <!-- ... 其他导航内容 ... -->
+</nav>
+
+<!-- 在 script 标签内添加菜单切换功能 -->
+<script>
+    function toggleMenu() {
+        const navLinks = document.querySelector('.nav-links');
+        navLinks.classList.toggle('active');
+    }
+</script>
