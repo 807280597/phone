@@ -687,7 +687,55 @@
     </footer>
 
     <!-- 先加载配置文件 -->
-    <script src="config/site-config.js"></script>
+    <script>
+        const siteConfig = {
+            // 导航菜单配置
+            navMenu: [
+                { text: "Redmi 14C", link: "product-detail.html?id=Redmi14C" },
+                { text: "Redmi 13C", link: "product-detail.html?id=Redmi13C" },
+                { text: "Galaxy A14", link: "product-detail.html?id=GalaxyA14" },
+            ],
+            
+            // 首页横幅配置
+            hero: {
+                backgroundImage: "https://cdn.cnbj0.fds.api.mi-img.com/b2c-shopapi-pms/pms_1735279484.79977296.png",  // 修改为在线图片
+                title: "Better Than Better",
+                subtitle: "Best Phone For You",
+                button: {
+                    text: "Learn more",
+                    link: "product-detail.html?id=Redmi14C"
+                }
+            },
+            
+            // 热门产品配置
+            hotProducts: [
+                {
+                    id: "Redmi14C",
+                    image: "https://cdn.cnbj0.fds.api.mi-img.com/b2c-shopapi-pms/pms_1735279484.82964217.png",
+                    name: "Redmi 14C",
+                    description: "8G+256G",
+                    price: "₦150.000",
+                    link: "product-detail.html?id=Redmi14C"
+                },
+                {
+                    id: "Redmi13C",
+                    image: "https://cdn.cnbj0.fds.api.mi-img.com/b2c-shopapi-pms/pms_1703560944.44484704.png",
+                    name: "Redmi 13C",
+                    description: "8G+256G",
+                    price: "₦140.000",
+                    link: "product-detail.html?id=Redmi13C"
+                },
+                {
+                    id: "GalaxyA14",
+                    image: "https://img1.baidu.com/it/u=1291044698,658670669&fm=253&fmt=auto&app=120&f=JPEG?w=554&h=500",
+                    name: "Galaxy A14",
+                    description: "6G+128G",
+                    price: "₦150.000",
+                    link: "product-detail.html?id=GalaxyA14"
+                }
+            ]
+        };
+    </script>
     
     <script>
         // 登录注册模态框控制
