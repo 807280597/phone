@@ -99,7 +99,7 @@ nav {
     position: absolute;
     top: 100%; /* 从按钮底部开始 */
     right: 100%; /* 从右侧50%开始 */
-    transform: translateX(50%); /* 向左移动自身50%以居中对齐 */
+    transform: translateX(100%); /* 向左移动自身50%以居中对齐 */
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 4px;
