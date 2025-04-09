@@ -209,186 +209,81 @@ function closeCustomerModal() {
 // 处理客服留言
 function handleMessage(event) {
     event.preventDefault();
+    
     const contactInfo = document.getElementById('contactInfo').value;
     const messageContent = document.getElementById('messageContent').value;
     
-    // 验证联系方式
-    if (!validateAccount(contactInfo)) {
-        alert('请输入正确的手机号或邮箱');
-        return false;
-    }
+    // 存储留言
+    let messages = JSON.parse(localStorage.getItem('customerMessages')) || [];
+    messages.push({
+        contactInfo,
+        message: messageContent,
+        time: new Date().toISOString()
+    });
     
-    // 验证留言内容
-    if (messageContent.trim().length < 10) {
-        alert('留言内容不能少于10个字符');
-        return false;
-    }
+    localStorage.setItem('customerMessages', JSON.stringify(messages));
     
-    // 模拟提交留言
+    closeCustomerModal();
     alert('留言已提交，我们会尽快联系您！');
     
-    // 关闭模态框
-    closeCustomerModal();
-    
-    // 清空表单
-    document.getElementById('contactInfo').value = '';
-    document.getElementById('messageContent').value = '';
-    
     return false;
 }
 
-// 验证账号格式（手机号或邮箱）
-function validateAccount(account) {
-    // 手机号正则（简化版）
-    const phoneRegex = /^1[3-9]\d{9}$/;
+// 导出客服留言
+function exportMessages() {
+    if (!currentUser) {
+        alert('请先登录！');
+        return;
+    }
     
-    // 邮箱正则
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    let messages = JSON.parse(localStorage.getItem('customerMessages')) || [];
     
-    return phoneRegex.test(account) || emailRegex.test(account);
+    // 创建留言数据CSV
+    let csvContent = "联系方式,留言内容,提交时间\n";
+    messages.forEach(msg => {
+        csvContent += `${msg.contactInfo},"${msg.message.replace(/"/g, '""')}",${msg.time}\n`;
+    });
+    
+    // 创建下载链接
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'customer_messages.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
-// 用户状态管理
-let currentUser = null;
-
-// 初始化用户状态
-function initUserState() {
-    // 从localStorage获取用户信息
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-        try {
-            currentUser = JSON.parse(savedUser);
-            updateUIForLoggedInUser();
-        } catch (e) {
-            console.error('解析用户信息失败', e);
-            localStorage.removeItem('currentUser');
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化用户状态
+    initUserState();
+    
+    // 检查是否有记住的用户
+    const rememberedUser = JSON.parse(localStorage.getItem('rememberedUser'));
+    if (rememberedUser && !currentUser) {
+        document.getElementById('loginAccount').value = rememberedUser.account;
+        document.getElementById('loginPassword').value = rememberedUser.password;
+        document.getElementById('rememberMe').checked = true;
+    }
+    
+    // 修改客服模态框，添加导出留言按钮
+    const customerModal = document.getElementById('customerModal');
+    if (customerModal) {
+        const modalContent = customerModal.querySelector('.modal-content');
+        if (modalContent && currentUser) {
+            const exportButton = document.createElement('button');
+            exportButton.className = 'btn-secondary';
+            exportButton.style.marginTop = '10px';
+            exportButton.textContent = '导出留言数据';
+            exportButton.onclick = exportMessages;
+            modalContent.appendChild(exportButton);
         }
     }
-}
-
-// 更新已登录用户的UI
-function updateUIForLoggedInUser() {
-    if (!currentUser) return;
     
-    // 更新用户菜单
-    const userMenu = document.getElementById('userMenu');
-    if (userMenu) {
-        userMenu.innerHTML = `
-            <div class="user-info">
-                <span>欢迎，${currentUser.account}</span>
-            </div>
-            <a href="#" onclick="handleLogout(); return false;">退出登录</a>
-        `;
-    }
-}
+    // ... 其他初始化代码 ...
+});
 
-// 处理登录
-function handleLogin(event) {
-    event.preventDefault();
-    const account = document.getElementById('loginAccount').value;
-    const password = document.getElementById('loginPassword').value;
-    const rememberMe = document.getElementById('rememberMe').checked;
-
-    // 验证账号格式
-    if (!validateAccount(account)) {
-        alert('请输入正确的手机号或邮箱');
-        return false;
-    }
-
-    // 模拟登录验证
-    if (password.length < 6) {
-        alert('密码长度不能少于6位');
-        return false;
-    }
-
-    // 模拟登录成功
-    currentUser = { account: account };
-    
-    // 保存用户状态
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // 如果选择记住密码，保存到localStorage
-    if (rememberMe) {
-        localStorage.setItem('savedAccount', account);
-        localStorage.setItem('savedPassword', password);
-    } else {
-        localStorage.removeItem('savedAccount');
-        localStorage.removeItem('savedPassword');
-    }
-
-    // 更新UI
-    updateUIForLoggedInUser();
-    
-    // 关闭登录模态框
-    closeModal('login');
-    
-    alert('登录成功！');
-    return false;
-}
-
-// 处理注册
-function handleRegister(event) {
-    event.preventDefault();
-    const account = document.getElementById('registerAccount').value;
-    const password = document.getElementById('registerPassword').value;
-    const confirmPwd = document.getElementById('confirmPassword').value;
-
-    // 验证账号格式
-    if (!validateAccount(account)) {
-        alert('请输入正确的手机号或邮箱');
-        return false;
-    }
-
-    // 验证密码
-    if (password.length < 6) {
-        alert('密码长度不能少于6位');
-        return false;
-    }
-    
-    if (password !== confirmPwd) {
-        alert('两次输入的密码不一致');
-        return false;
-    }
-
-    // 模拟检查账号是否已存在
-    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    if (registeredUsers.some(user => user.account === account)) {
-        alert('该账号已被注册');
-        return false;
-    }
-
-    // 模拟注册成功，保存用户信息
-    registeredUsers.push({ account, password });
-    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-
-    // 自动登录
-    currentUser = { account: account };
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // 更新UI
-    updateUIForLoggedInUser();
-    
-    // 关闭注册模态框
-    closeModal('register');
-    
-    alert('注册成功并已自动登录！');
-    return false;
-}
-
-// 处理退出登录
-function handleLogout() {
-    // 清除当前用户
-    currentUser = null;
-    localStorage.removeItem('currentUser');
-    
-    // 恢复未登录状态的UI
-    const userMenu = document.getElementById('userMenu');
-    if (userMenu) {
-        userMenu.innerHTML = `
-            <a href="#" onclick="showModal('login'); return false;">登录</a>
-            <a href="#" onclick="showModal('register'); return false;">注册</a>
-        `;
-    }
-    
-    alert('已退出登录');
-}
+// ... 现有代码 ...
