@@ -21,7 +21,6 @@ const commonConfig = {
         phone: "400-XXX-XXXX",
         email: "contact@getphonehub.com",
         whatsapp: "XXXXXX",
-        workTime: "周一至周日 9:00-22:00"
     },
     
     // 底部联系方式
