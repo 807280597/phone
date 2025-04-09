@@ -30,13 +30,13 @@
                     </button>
                     <!-- 用户菜单 -->
                     <div class="user-menu" id="userMenu">
-                        <a href="#" onclick="showModal('login'); return false;">登录</a>
-                        <a href="#" onclick="showModal('register'); return false;">注册</a>
+                        <a href="#" onclick="showModal('login'); return false;">Login</a>
+                        <a href="#" onclick="showModal('register'); return false;">Register</a>
                     </div>
                     <!-- 客服链接 -->
                     <a href="#" class="customer-service" onclick="showCustomerModal(); return false;">
                         <i class="fas fa-headset"></i>
-                        <span class="desktop-only">客服</span>
+                        <span class="desktop-only">Customer service</span>
                     </a>
                     <!-- 移动端菜单按钮 -->
                     <button class="mobile-menu-toggle">
@@ -50,7 +50,7 @@
     <!-- 移动端菜单 -->
     <div class="mobile-menu">
         <div class="mobile-menu-header">
-            <h3>菜单</h3>
+            <h3>Menu</h3>
             <button class="mobile-menu-close">
                 <i class="fas fa-times"></i>
             </button>
@@ -105,14 +105,15 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>联系我们</h3>
+                    <h3>Contact us</h3>
                     <div class="footer-contact">
                         <!-- 联系方式将通过JS动态生成 -->
                     </div>
                 </div>
                 <div class="footer-section">
-                    <h3>关于我们</h3>
-                    <p>GetPhoneHub是您值得信赖的手机购买平台，提供最新、最全面的手机产品信息。</p>
+                    <h3>About us</h3>
+                    <p>GetPhoneHub is a mobile phone purchasing platform you can trust, 
+                        providing the latest and most comprehensive mobile phone product information。</p>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -125,7 +126,7 @@
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('login')">&times;</span>
-            <h2>登录</h2>
+            <h2>Login</h2>
             <form id="loginForm" onsubmit="return handleLogin(event)">
                 <div class="form-group">
                     <input type="text" id="loginAccount" placeholder="手机号/邮箱" required>
@@ -135,13 +136,13 @@
                 </div>
                 <div class="form-group remember-me">
                     <label>
-                        <input type="checkbox" id="rememberMe"> 记住密码
+                        <input type="checkbox" id="rememberMe"> RememberMe
                     </label>
                 </div>
                 <button type="submit" class="btn-primary">登录</button>
                 <div class="switch-form">
-                    <span>还没有账号？</span>
-                    <a href="#" onclick="switchForm('register'); return false;">立即注册</a>
+                    <span>No account yet?</span>
+                    <a href="#" onclick="switchForm('register'); return false;">Register</a>
                 </div>
             </form>
         </div>
@@ -151,7 +152,7 @@
     <div id="registerModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('register')">&times;</span>
-            <h2>注册</h2>
+            <h2>Register</h2>
             <form id="registerForm" onsubmit="return handleRegister(event)">
                 <div class="form-group">
                     <input type="text" id="registerAccount" placeholder="手机号/邮箱" required>
@@ -162,10 +163,10 @@
                 <div class="form-group">
                     <input type="password" id="confirmPassword" placeholder="确认密码" required>
                 </div>
-                <button type="submit" class="btn-primary">注册</button>
+                <button type="submit" class="btn-primary">Register</button>
                 <div class="switch-form">
-                    <span>已有账号？</span>
-                    <a href="#" onclick="switchForm('login'); return false;">立即登录</a>
+                    <span>Already have an account?</span>
+                    <a href="#" onclick="switchForm('login'); return false;">Sign in now</a>
                 </div>
             </form>
         </div>
@@ -175,21 +176,20 @@
     <div id="customerModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeCustomerModal()">&times;</span>
-            <h2>联系客服</h2>
+            <h2>Contact us</h2>
             <div class="customer-info">
-                <p>在线时间：<span id="customerWorkTime"></span></p>
-                <p>客服热线：<span id="customerPhone"></span></p>
-                <p>邮箱：<span id="customerEmail"></span></p>
+                <p>Customer Service Hotline:<span id="customerPhone"></span></p>
+                <p>Mail:<span id="customerEmail"></span></p>
                 <p>WhatsApp：<span id="customerWhatsapp"></span></p>
             </div>
             <form id="messageForm" onsubmit="return handleMessage(event)">
                 <div class="form-group">
-                    <input type="text" id="contactInfo" placeholder="请输入您的手机号/邮箱" required>
+                    <input type="text" id="contactInfo" placeholder="Please enter your phone number/email" required>
                 </div>
                 <div class="form-group">
-                    <textarea id="messageContent" placeholder="请描述您的问题..." rows="4" required></textarea>
+                    <textarea id="messageContent" placeholder="Please describe your question..." rows="4" required></textarea>
                 </div>
-                <button type="submit" class="btn-primary">提交留言</button>
+                <button type="submit" class="btn-primary">Submit a message</button>
             </form>
         </div>
     </div>
