@@ -2,8 +2,8 @@
 const indexConfig = {
     // 海报配置
     banner: {
-        image: "file:///D:/%E7%94%9F%E8%B4%A2%E6%9C%89%E6%9C%AF/%E6%89%8B%E6%9C%BA%E7%BD%91%E7%AB%99/%E7%89%A9%E6%96%99/19a35e2e-bae6-4fb6-98e9-a71df3a685e1.jpg",
-        link: "https://img1.baidu.com/it/u=1291044698,658670669&fm=253&fmt=auto&app=120&f=JPEG?w=554&h=500",
+        image: "https://i02.appmifile.com/43_operator_sg/13/09/2024/d9dd5503e0354fdfbfc43b2fc75415b3.jpg",
+        link: "product-detail.html?id=redmi14c",
         title: "Best Phone For You",
         subtitle: "Discover the best mobile phones",
         buttonText: "Learn More",
