@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品详情 - GetPhoneHub.com</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TNB6C3SLCQ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-TNB6C3SLCQ');
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/product-detail.css">
+</head>
+<body>
+    <!-- 先加载配置文件 -->
+    <script src="config/common-config.js"></script>
+    <script src="config/product-detail-config.js"></script>
+    <script src="config/language-config.js"></script>
+    
+    <!-- 头部导航 -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>GetPhoneHub</span>
+                </a>
+                <div class="nav-links">
+                    <!-- 导航菜单将通过JS动态生成 -->
+                </div>
+                <div class="auth-buttons">
+                    <button class="btn-user" onclick="showUserMenu(event)">
+                        <i class="fas fa-user"></i>
+                    </button>
+                    <!-- 用户菜单 -->
+                    <div class="user-menu" id="userMenu">
+                        <a href="#" onclick="showModal('login'); return false;">Login</a>
+                        <a href="#" onclick="showModal('register'); return false;">Register</a>
+                    </div>
+                    <!-- 客服链接 -->
+                    <a href="#" class="customer-service" onclick="showCustomerModal(); return false;">
+                        <i class="fas fa-headset"></i>
+                        <span class="desktop-only">Customer service</span>
+                    </a>
+                    <!-- 移动端菜单按钮 -->
+                    <button class="mobile-menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu">
+        <div class="mobile-menu-header">
+            <h3>Menu</h3>
+            <button class="mobile-menu-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-menu-links">
+            <!-- 移动端菜单项将通过JS动态生成 -->
+        </div>
+    </div>
+    <div class="mobile-menu-overlay"></div>
+    
+    <!-- 主要内容 -->
+    <main>
+        <section class="product-detail">
+            <div class="container">
+                <div class="product-main">
+                    <div class="product-gallery">
+                        <div class="main-image-container">
+                            <img src="https://via.placeholder.com/600x600/f8f9fa/007bff?text=主图" alt="产品主图" class="main-image">
+                        </div>
+                        <div class="thumbnail-grid">
+                            <!-- 缩略图将通过JS动态生成 -->
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h1 class="product-title">产品名称</h1>
+                        <div class="product-price">¥ XX,XXX</div>
+                        <div class="product-description">
+                            <p>产品详细描述内容...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-specs">
+                    <h2 class="specs-title">规格参数</h2>
+                    <div class="specs-grid">
+                        <!-- 规格参数将通过JS动态生成 -->
+                    </div>
+                </div>
+
+                <div class="related-products">
+                    <h2 class="related-title">相关推荐</h2>
+                    <div class="related-grid">
+                        <!-- 相关推荐将通过JS动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contact us</h3>
+                    <div class="footer-contact">
+                        <!-- 联系方式将通过JS动态生成 -->
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>About us</h3>
+                    <p>GetPhoneHub is a mobile phone purchasing platform you can trust, 
+                        providing the latest and most comprehensive mobile phone product information。</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copyright"></p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('login')">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm" onsubmit="return handleLogin(event)">
+                <div class="form-group">
+                    <input type="text" id="loginAccount" placeholder="Phone number/Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                </div>
+                <div class="form-group remember-me">
+                    <label>
+                        <input type="checkbox" id="rememberMe"> RememberMe
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+                <div class="switch-form">
+                    <span>No account yet?</span>
+                    <a href="#" onclick="switchForm('register'); return false;">Register</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 注册模态框 -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('register')">&times;</span>
+            <h2>Register</h2>
+            <form id="registerForm" onsubmit="return handleRegister(event)">
+                <div class="form-group">
+                    <input type="text" id="registerAccount" placeholder="Phone number/Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPassword" placeholder="Password" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                </div>
+                <button type="submit" class="btn-primary">Register</button>
+                <div class="switch-form">
+                    <span>Already have an account?</span>
+                    <a href="#" onclick="switchForm('login'); return false;">Sign in now</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 客服模态框 -->
+    <div id="customerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCustomerModal()">&times;</span>
+            <h2>Contact us</h2>
+            <div class="customer-info">
+                <p>Customer Service Hotline:<span id="customerPhone"></span></p>
+                <p>Mail:<span id="customerEmail"></span></p>
+                <p>WhatsApp：<span id="customerWhatsapp"></span></p>
+            </div>
+            <form id="messageForm" onsubmit="return handleMessage(event)">
+                <div class="form-group">
+                    <input type="text" id="contactInfo" placeholder="Please enter your phone number/email" required>
+                </div>
+                <div class="form-group">
+                    <textarea id="messageContent" placeholder="Please describe your question..." rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Submit a message</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 脚本 -->
+    <script src="js/common.js"></script>
+    <script src="js/product-detail.js"></script>
+</body>
+</html>
