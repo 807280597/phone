@@ -285,93 +285,79 @@ function updateUIForLoggedInUser() {
 // 处理登录
 function handleLogin(event) {
     event.preventDefault();
-    
     const account = document.getElementById('loginAccount').value;
     const password = document.getElementById('loginPassword').value;
     const rememberMe = document.getElementById('rememberMe').checked;
-    
-    // 添加日志，帮助调试
-    console.log("尝试登录:", account);
     
     // 判断是邮箱还是手机号
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(account);
     const isPhone = /^\d{10,15}$/.test(account);
     
+    // 验证输入
+    if (!account || !password) {
+        alert('请输入账号和密码');
+        return false;
+    }
+    
     showLoading();
     
+    // 对于邮箱登录，直接使用Firebase Auth
     if (isEmail) {
-        // 使用邮箱登录
         auth.signInWithEmailAndPassword(account, password)
             .then((userCredential) => {
                 // 登录成功
-                console.log("邮箱登录成功");
                 hideLoading();
                 closeModal('login');
                 showToast('登录成功！');
             })
             .catch((error) => {
                 // 登录失败
-                console.error("邮箱登录失败:", error);
                 hideLoading();
+                console.error("登录错误:", error);
                 showToast(getErrorMessage(error));
             });
-    } else if (isPhone) {
-        // 使用手机号登录
-        console.log("尝试手机号登录");
-        
-        // 查询数据库中的手机用户
-        database.ref('phoneUsers').orderByChild('phone').equalTo(account).once('value')
+    } 
+    // 对于手机号登录，先匿名登录Firebase，然后查询手机用户
+    else if (isPhone) {
+        // 先匿名登录Firebase获取权限
+        auth.signInAnonymously()
+            .then(() => {
+                // 查询手机号用户
+                return database.ref('phoneUsers').orderByChild('phone').equalTo(account).once('value');
+            })
             .then((snapshot) => {
-                console.log("查询结果:", snapshot.exists());
-                
                 if (snapshot.exists()) {
                     // 找到手机号对应的用户
-                    let userData = null;
-                    let userId = null;
-                    
+                    let userData;
                     snapshot.forEach((childSnapshot) => {
                         userData = childSnapshot.val();
-                        userId = childSnapshot.key;
                     });
                     
-                    console.log("找到用户数据:", userData);
-                    
-                    // 验证密码 - 直接比较明文密码
+                    // 验证密码
                     if (userData && userData.password === password) {
-                        console.log("密码验证成功");
-                        
-                        // 登录成功，保存用户信息
-                        const userInfo = {
+                        // 登录成功
+                        localStorage.setItem('phoneUser', JSON.stringify({
                             phone: account,
-                            uid: userId
-                        };
-                        
-                        if (rememberMe) {
-                            localStorage.setItem('phoneUser', JSON.stringify(userInfo));
-                        } else {
-                            sessionStorage.setItem('phoneUser', JSON.stringify(userInfo));
-                        }
-                        
+                            uid: userData.uid
+                        }));
                         hideLoading();
                         closeModal('login');
                         showToast('登录成功！');
-                        updateUserUI(userInfo);
+                        updateUserUI({ phone: account });
                     } else {
-                        console.log("密码验证失败");
                         // 密码错误
                         hideLoading();
                         showToast('密码错误，请重试！');
                     }
                 } else {
                     // 未找到用户
-                    console.log("未找到用户");
                     hideLoading();
                     showToast('该手机号未注册，请先注册！');
                 }
             })
             .catch((error) => {
-                console.error("手机号登录查询失败:", error);
                 hideLoading();
+                console.error("登录错误:", error);
                 showToast('登录失败，请稍后重试！');
             });
     } else {
@@ -385,11 +371,10 @@ function handleLogin(event) {
 // 处理注册
 function handleRegister(event) {
     event.preventDefault();
-    
     const account = document.getElementById('registerAccount').value;
     const password = document.getElementById('registerPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    
+    const confirmPwd = document.getElementById('confirmPassword').value;
+
     // 验证账号格式
     if (!validateAccount(account)) {
         alert('请输入正确的手机号或邮箱');
@@ -402,7 +387,7 @@ function handleRegister(event) {
         return false;
     }
     
-    if (password !== confirmPassword) {
+    if (password !== confirmPwd) {
         alert('两次输入的密码不一致');
         return false;
     }
@@ -698,10 +683,16 @@ function handleLogin(event) {
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(account);
     const isPhone = /^\d{10,15}$/.test(account);
     
+    // 验证输入
+    if (!account || !password) {
+        alert('请输入账号和密码');
+        return false;
+    }
+    
     showLoading();
     
+    // 对于邮箱登录，直接使用Firebase Auth
     if (isEmail) {
-        // 使用邮箱登录
         auth.signInWithEmailAndPassword(account, password)
             .then((userCredential) => {
                 // 登录成功
@@ -712,65 +703,51 @@ function handleLogin(event) {
             .catch((error) => {
                 // 登录失败
                 hideLoading();
+                console.error("登录错误:", error);
                 showToast(getErrorMessage(error));
             });
-    } else if (isPhone) {
-        // 使用手机号登录
-        console.log("尝试手机号登录");
-        
-        // 查询数据库中的手机用户
-        database.ref('phoneUsers').orderByChild('phone').equalTo(account).once('value')
+    } 
+    // 对于手机号登录，先匿名登录Firebase，然后查询手机用户
+    else if (isPhone) {
+        // 先匿名登录Firebase获取权限
+        auth.signInAnonymously()
+            .then(() => {
+                // 查询手机号用户
+                return database.ref('phoneUsers').orderByChild('phone').equalTo(account).once('value');
+            })
             .then((snapshot) => {
-                console.log("查询结果:", snapshot.exists());
-                
                 if (snapshot.exists()) {
                     // 找到手机号对应的用户
-                    let userData = null;
-                    let userId = null;
-                    
+                    let userData;
                     snapshot.forEach((childSnapshot) => {
                         userData = childSnapshot.val();
-                        userId = childSnapshot.key;
                     });
                     
-                    console.log("找到用户数据:", userData);
-                    
-                    // 验证密码 - 直接比较明文密码
+                    // 验证密码
                     if (userData && userData.password === password) {
-                        console.log("密码验证成功");
-                        
-                        // 登录成功，保存用户信息
-                        const userInfo = {
+                        // 登录成功
+                        localStorage.setItem('phoneUser', JSON.stringify({
                             phone: account,
-                            uid: userId
-                        };
-                        
-                        if (rememberMe) {
-                            localStorage.setItem('phoneUser', JSON.stringify(userInfo));
-                        } else {
-                            sessionStorage.setItem('phoneUser', JSON.stringify(userInfo));
-                        }
-                        
+                            uid: userData.uid
+                        }));
                         hideLoading();
                         closeModal('login');
                         showToast('登录成功！');
-                        updateUserUI(userInfo);
+                        updateUserUI({ phone: account });
                     } else {
-                        console.log("密码验证失败");
                         // 密码错误
                         hideLoading();
                         showToast('密码错误，请重试！');
                     }
                 } else {
                     // 未找到用户
-                    console.log("未找到用户");
                     hideLoading();
                     showToast('该手机号未注册，请先注册！');
                 }
             })
             .catch((error) => {
-                console.error("手机号登录查询失败:", error);
                 hideLoading();
+                console.error("登录错误:", error);
                 showToast('登录失败，请稍后重试！');
             });
     } else {
@@ -835,16 +812,11 @@ function handleRegister(event) {
             });
     } else if (isPhone) {
         // 使用手机号注册
-        console.log("尝试手机号注册");
-        
         // 先检查手机号是否已注册
         database.ref('phoneUsers').orderByChild('phone').equalTo(account).once('value')
             .then((snapshot) => {
-                console.log("查询结果:", snapshot.exists());
-                
                 if (snapshot.exists()) {
                     // 手机号已注册
-                    console.log("手机号已注册");
                     hideLoading();
                     showToast('该手机号已注册，请直接登录！');
                     
@@ -855,16 +827,16 @@ function handleRegister(event) {
                     }, 1500);
                 } else {
                     // 手机号未注册，创建新用户
-                    console.log("创建新手机用户");
                     const newUserRef = database.ref('phoneUsers').push();
+                    const uid = newUserRef.key;
                     
                     newUserRef.set({
                         phone: account,
-                        password: password,  // 明文存储密码（生产环境应加密）
-                        registerDate: new Date().toISOString()
+                        password: password,
+                        registerDate: new Date().toISOString(),
+                        uid: uid
                     })
                     .then(() => {
-                        console.log("手机用户创建成功");
                         hideLoading();
                         closeModal('register');
                         showToast('注册成功！');
@@ -876,16 +848,16 @@ function handleRegister(event) {
                         }, 1500);
                     })
                     .catch((error) => {
-                        console.error("手机用户创建失败:", error);
                         hideLoading();
                         showToast('注册失败，请稍后重试！');
+                        console.error(error);
                     });
                 }
             })
             .catch((error) => {
-                console.error("手机号查询失败:", error);
                 hideLoading();
                 showToast('注册失败，请稍后重试！');
+                console.error(error);
             });
     }
     
