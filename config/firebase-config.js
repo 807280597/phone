@@ -1,12 +1,12 @@
 // Firebase配置
 const firebaseConfig = {
-    apiKey: "AIzaSyCyV8vMvkv6WvIe8rDU3-vOAPnCk1Zc_OM",
-    authDomain: "getphonehub.firebaseapp.com",
-    databaseURL: "https://getphonehub-default-rtdb.firebaseio.com",
-    projectId: "getphonehub",
-    storageBucket: "getphonehub.firebasestorage.app",
-    messagingSenderId: "829298237948",
-    appId: "1:829298237948:web:2f9db3ab8ce11779589279",
+  apiKey: ENV.FIREBASE_API_KEY,
+  authDomain: ENV.FIREBASE_AUTH_DOMAIN,
+  databaseURL: ENV.FIREBASE_DATABASE_URL,
+  projectId: ENV.FIREBASE_PROJECT_ID,
+  storageBucket: ENV.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: ENV.FIREBASE_MESSAGING_SENDER_ID,
+  appId: ENV.FIREBASE_APP_ID
 };
 
 // 初始化Firebase
