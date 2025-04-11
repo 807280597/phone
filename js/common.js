@@ -636,41 +636,75 @@ function handleLogin(event) {
     const account = document.getElementById('loginAccount').value;
     const password = document.getElementById('loginPassword').value;
     const rememberMe = document.getElementById('rememberMe').checked;
-
-    // 验证账号格式
-    if (!validateAccount(account)) {
-        alert('请输入正确的手机号或邮箱');
-        return false;
-    }
-
-    // 模拟登录验证
-    if (password.length < 6) {
-        alert('密码长度不能少于6位');
-        return false;
-    }
-
-    // 模拟登录成功
-    currentUser = { account: account };
     
-    // 保存用户状态
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    // 判断是邮箱还是手机号
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(account);
+    const isPhone = /^\d{10,15}$/.test(account);
     
-    // 如果选择记住密码，保存到localStorage
-    if (rememberMe) {
-        localStorage.setItem('savedAccount', account);
-        localStorage.setItem('savedPassword', password);
+    showLoading();
+    
+    if (isEmail) {
+        // 使用邮箱登录
+        auth.signInWithEmailAndPassword(account, password)
+            .then((userCredential) => {
+                // 登录成功
+                hideLoading();
+                closeModal('login');
+                showToast('登录成功！');
+            })
+            .catch((error) => {
+                // 登录失败
+                hideLoading();
+                showToast(getErrorMessage(error));
+            });
+    } else if (isPhone) {
+        // 使用手机号登录需要先验证手机号
+        // 这里简化处理，实际应该有验证码流程
+        // 先查询是否有对应手机号的用户
+        database.ref('phoneUsers').orderByChild('phone').equalTo(account).once('value')
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    // 找到手机号对应的用户
+                    let userData;
+                    snapshot.forEach((childSnapshot) => {
+                        userData = childSnapshot.val();
+                    });
+                    
+                    // 验证密码
+                    if (userData && userData.password === password) {
+                        // 登录成功
+                        auth.signInAnonymously().then(() => {
+                            // 使用匿名登录后，将用户信息存储在本地
+                            localStorage.setItem('phoneUser', JSON.stringify({
+                                phone: account,
+                                uid: userData.uid
+                            }));
+                            hideLoading();
+                            closeModal('login');
+                            showToast('登录成功！');
+                            updateUserUI({ phone: account });
+                        });
+                    } else {
+                        // 密码错误
+                        hideLoading();
+                        showToast('密码错误，请重试！');
+                    }
+                } else {
+                    // 未找到用户
+                    hideLoading();
+                    showToast('该手机号未注册，请先注册！');
+                }
+            })
+            .catch((error) => {
+                hideLoading();
+                showToast('登录失败，请稍后重试！');
+                console.error(error);
+            });
     } else {
-        localStorage.removeItem('savedAccount');
-        localStorage.removeItem('savedPassword');
+        hideLoading();
+        showToast('请输入有效的手机号或邮箱地址！');
     }
-
-    // 更新UI
-    updateUIForLoggedInUser();
     
-    // 关闭登录模态框
-    closeModal('login');
-    
-    alert('登录成功！');
     return false;
 }
 
@@ -679,64 +713,217 @@ function handleRegister(event) {
     event.preventDefault();
     const account = document.getElementById('registerAccount').value;
     const password = document.getElementById('registerPassword').value;
-    const confirmPwd = document.getElementById('confirmPassword').value;
-
-    // 验证账号格式
-    if (!validateAccount(account)) {
-        alert('请输入正确的手机号或邮箱');
-        return false;
-    }
-
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
     // 验证密码
-    if (password.length < 6) {
-        alert('密码长度不能少于6位');
+    if (password !== confirmPassword) {
+        showToast('两次输入的密码不一致，请重新输入！');
         return false;
     }
     
-    if (password !== confirmPwd) {
-        alert('两次输入的密码不一致');
+    // 验证账号格式（邮箱或手机号）
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(account);
+    const isPhone = /^\d{10,15}$/.test(account);
+    
+    if (!isEmail && !isPhone) {
+        showToast('请输入有效的手机号或邮箱地址！');
         return false;
     }
-
-    // 模拟检查账号是否已存在
-    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    if (registeredUsers.some(user => user.account === account)) {
-        alert('该账号已被注册');
-        return false;
+    
+    showLoading();
+    
+    if (isEmail) {
+        // 使用邮箱注册
+        auth.createUserWithEmailAndPassword(account, password)
+            .then((userCredential) => {
+                // 注册成功
+                const user = userCredential.user;
+                
+                // 保存额外用户信息到数据库
+                return database.ref('users/' + user.uid).set({
+                    email: account,
+                    registerDate: new Date().toISOString()
+                });
+            })
+            .then(() => {
+                hideLoading();
+                closeModal('register');
+                showToast('注册成功！');
+                
+                // 自动切换到登录页
+                setTimeout(() => {
+                    showModal('login');
+                    document.getElementById('loginAccount').value = account;
+                }, 1500);
+            })
+            .catch((error) => {
+                hideLoading();
+                showToast(getErrorMessage(error));
+            });
+    } else if (isPhone) {
+        // 使用手机号注册
+        // 先检查手机号是否已注册
+        database.ref('phoneUsers').orderByChild('phone').equalTo(account).once('value')
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    // 手机号已注册
+                    hideLoading();
+                    showToast('该手机号已注册，请直接登录！');
+                    
+                    // 切换到登录页
+                    setTimeout(() => {
+                        switchForm('login');
+                        document.getElementById('loginAccount').value = account;
+                    }, 1500);
+                } else {
+                    // 手机号未注册，创建新用户
+                    const newUserRef = database.ref('phoneUsers').push();
+                    const uid = newUserRef.key;
+                    
+                    newUserRef.set({
+                        phone: account,
+                        password: password,
+                        registerDate: new Date().toISOString(),
+                        uid: uid
+                    })
+                    .then(() => {
+                        hideLoading();
+                        closeModal('register');
+                        showToast('注册成功！');
+                        
+                        // 自动切换到登录页
+                        setTimeout(() => {
+                            showModal('login');
+                            document.getElementById('loginAccount').value = account;
+                        }, 1500);
+                    })
+                    .catch((error) => {
+                        hideLoading();
+                        showToast('注册失败，请稍后重试！');
+                        console.error(error);
+                    });
+                }
+            })
+            .catch((error) => {
+                hideLoading();
+                showToast('注册失败，请稍后重试！');
+                console.error(error);
+            });
     }
-
-    // 模拟注册成功，保存用户信息
-    registeredUsers.push({ account, password });
-    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-
-    // 自动登录
-    currentUser = { account: account };
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
     
-    // 更新UI
-    updateUIForLoggedInUser();
-    
-    // 关闭注册模态框
-    closeModal('register');
-    
-    alert('注册成功并已自动登录！');
     return false;
 }
 
-// 处理退出登录
-function handleLogout() {
-    // 清除当前用户
-    currentUser = null;
-    localStorage.removeItem('currentUser');
-    
-    // 恢复未登录状态的UI
+// 更新用户界面
+function updateUserUI(userData) {
     const userMenu = document.getElementById('userMenu');
-    if (userMenu) {
+    
+    if (userData || auth.currentUser) {
+        // 已登录状态
+        const user = userData || auth.currentUser;
+        const displayName = user.email || user.phone || user.phoneNumber || '用户';
+        
         userMenu.innerHTML = `
-            <a href="#" onclick="showModal('login'); return false;">登录</a>
-            <a href="#" onclick="showModal('register'); return false;">注册</a>
+            <span>欢迎，${displayName}</span>
+            <a href="#" onclick="logout(); return false;">退出登录</a>
+        `;
+    } else {
+        // 未登录状态
+        userMenu.innerHTML = `
+            <a href="#" onclick="showModal('login'); return false;">Login</a>
+            <a href="#" onclick="showModal('register'); return false;">Register</a>
         `;
     }
-    
-    alert('已退出登录');
 }
+
+// 退出登录
+function logout() {
+    // 清除本地存储的手机用户信息
+    localStorage.removeItem('phoneUser');
+    
+    // Firebase退出登录
+    auth.signOut()
+        .then(() => {
+            updateUserUI(null);
+            showToast('已退出登录！');
+        })
+        .catch((error) => {
+            console.error('退出登录失败:', error);
+        });
+}
+
+// 获取错误信息
+function getErrorMessage(error) {
+    switch (error.code) {
+        case 'auth/email-already-in-use':
+            return '该邮箱已被注册，请直接登录！';
+        case 'auth/invalid-email':
+            return '邮箱格式不正确！';
+        case 'auth/weak-password':
+            return '密码强度太弱，请使用更复杂的密码！';
+        case 'auth/user-not-found':
+            return '该账号不存在，请先注册！';
+        case 'auth/wrong-password':
+            return '密码错误，请重试！';
+        default:
+            return '操作失败，请稍后重试！';
+    }
+}
+
+// 显示加载中
+function showLoading() {
+    // 创建加载元素
+    if (!document.getElementById('loadingOverlay')) {
+        const loading = document.createElement('div');
+        loading.id = 'loadingOverlay';
+        loading.innerHTML = '<div class="loading-spinner"></div>';
+        document.body.appendChild(loading);
+    }
+    document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
+// 隐藏加载中
+function hideLoading() {
+    const loading = document.getElementById('loadingOverlay');
+    if (loading) {
+        loading.style.display = 'none';
+    }
+}
+
+// 显示提示消息
+function showToast(message) {
+    // 创建toast元素
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    
+    // 添加到页面
+    document.body.appendChild(toast);
+    
+    // 显示toast
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    
+    // 3秒后隐藏并移除
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+// 监听认证状态变化
+auth.onAuthStateChanged((user) => {
+    // 检查是否有手机用户登录
+    const phoneUser = JSON.parse(localStorage.getItem('phoneUser'));
+    
+    if (user || phoneUser) {
+        // 用户已登录
+        updateUserUI(user || phoneUser);
+    } else {
+        // 用户未登录
+        updateUserUI(null);
+    }
+});
