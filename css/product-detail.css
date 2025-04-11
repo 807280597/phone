@@ -166,7 +166,7 @@ main {
     margin-bottom: 0;
 }
 
-/* 响应式设计 */
+/* 响应式设计518 */
 @media (max-width: 768px) {
     .product-main {
         grid-template-columns: 1fr;
