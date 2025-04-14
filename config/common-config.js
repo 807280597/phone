@@ -1,7 +1,7 @@
 // 网站公共配置
 const commonConfig = {
     // 网站标题
-    siteTitle: "GetPhoneHub111",
+    siteTitle: "GetPhoneHub2222",
     
     // Logo配置
     logo: {
