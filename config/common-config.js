@@ -1,7 +1,7 @@
 // 网站公共配置
 const commonConfig = {
     // 网站标题
-    siteTitle: "GetPhoneHub",
+    siteTitle: "GetPhoneHub111",
     
     // Logo配置
     logo: {
@@ -18,18 +18,12 @@ const commonConfig = {
     
     // 客服配置
     customerService: {
-        phone: "400-XXX-XXXX",
-        email: "contact@getphonehub.com",
-        whatsapp: "XXXXXX",
+        email: "h807280597@gmail.com",
     },
     
     // 底部联系方式
     contactInfo: {
-        phone: "400-XXX-XXXX",
-        email: "contact@getphonehub.com",
-        whatsapp: "XXXXXX"
+        email: "h807280597@gmail.com",
     },
-    
-    // 版权信息
-    copyright: "© 2024 GetPhoneHub.com All rights reserved."
+   
 };

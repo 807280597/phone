@@ -37,13 +37,23 @@ nav {
     padding: 15px 0;
 }
 
+/* 添加到现有的 CSS 文件中 */
 .logo {
     display: flex;
     align-items: center;
     text-decoration: none;
     color: #333;
+}
+
+.site-logo {
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+}
+
+.logo span {
     font-weight: bold;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
 }
 
 .logo i {
@@ -463,4 +473,65 @@ footer {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* 社交登录区域 */
+.social-login {
+    margin-top: 20px;
+    text-align: center;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.social-login p {
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 14px;
+}
+
+.google-login-btn {
+    background-color: #fff;
+    color: #444;
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.google-login-btn:hover {
+    background-color: #f8f8f8;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.google-login-btn i {
+    margin-right: 8px;
+    color: #4285F4;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .google-login-btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+/* 用户头像 */
+.user-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
 }

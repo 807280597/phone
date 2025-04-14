@@ -1,0 +1,8 @@
+@echo off
+chcp 65001
+echo 正在推送手机网站代码到GitHub...
+git add .
+git commit -m "更新手机网站: %date% %time%"
+git push
+echo 推送完成！
+pause

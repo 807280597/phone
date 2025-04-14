@@ -1,3 +1,23 @@
+// 初始化 Firebase
+if (!window.firebase || !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+    window.auth = firebase.auth();
+    window.database = firebase.database();
+}
+
+// 初始化数据库引用并创建messages节点（如果不存在）
+database.ref('messages').once('value')
+    .then((snapshot) => {
+        if (!snapshot.exists()) {
+            database.ref('messages').set({
+                created: new Date().toISOString()
+            });
+        }
+    });
+
+// ... 其余代码保持不变 ...
+
+// ... 其余代码保持不变 ...
 // 页面加载完成后执行
 document.addEventListener('DOMContentLoaded', function() {
     // 初始化导航菜单
@@ -17,6 +37,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 初始化用户状态
     initUserState();
+    
+    // 初始化谷歌登录
+    initGoogleLogin();
 });
 
 // 初始化导航菜单
@@ -82,26 +105,14 @@ function initFooter() {
 
 // 初始化客服信息
 function initCustomerService() {
-    const customerWorkTime = document.getElementById('customerWorkTime');
-    const customerPhone = document.getElementById('customerPhone');
     const customerEmail = document.getElementById('customerEmail');
-    const customerWhatsapp = document.getElementById('customerWhatsapp');
     
-    if (customerWorkTime && commonConfig.customerService && commonConfig.customerService.workTime) {
-        customerWorkTime.textContent = commonConfig.customerService.workTime;
-    }
-    
-    if (customerPhone && commonConfig.customerService && commonConfig.customerService.phone) {
-        customerPhone.textContent = commonConfig.customerService.phone;
-    }
     
     if (customerEmail && commonConfig.customerService && commonConfig.customerService.email) {
         customerEmail.textContent = commonConfig.customerService.email;
     }
     
-    if (customerWhatsapp && commonConfig.customerService && commonConfig.customerService.whatsapp) {
-        customerWhatsapp.textContent = commonConfig.customerService.whatsapp;
-    }
+   
 }
 
 // 设置移动端菜单
@@ -214,25 +225,47 @@ function handleMessage(event) {
     
     // 验证联系方式
     if (!validateAccount(contactInfo)) {
-        alert('请输入正确的手机号或邮箱');
+        showToast('请输入正确的手机号或邮箱');
         return false;
     }
     
     // 验证留言内容
     if (messageContent.trim().length < 10) {
-        alert('留言内容不能少于10个字符');
+        showToast('留言内容不能少于10个字符');
         return false;
     }
     
-    // 模拟提交留言
-    alert('留言已提交，我们会尽快联系您！');
+    // 显示加载中
+    showLoading();
     
-    // 关闭模态框
-    closeCustomerModal();
+    // 创建留言数据对象
+    const messageData = {
+        contactInfo: contactInfo,
+        content: messageContent,
+        timestamp: new Date().toISOString(),
+        status: 'unread' // 标记为未读
+    };
     
-    // 清空表单
-    document.getElementById('contactInfo').value = '';
-    document.getElementById('messageContent').value = '';
+    // 将留言保存到 Firebase 数据库
+    database.ref('messages').push(messageData)
+        .then(() => {
+            // 保存成功
+            hideLoading();
+            showToast('留言已提交，我们会尽快联系您！');
+            
+            // 关闭模态框
+            closeCustomerModal();
+            
+            // 清空表单
+            document.getElementById('contactInfo').value = '';
+            document.getElementById('messageContent').value = '';
+        })
+        .catch((error) => {
+            // 保存失败
+            hideLoading();
+            showToast('留言提交失败，请稍后重试！');
+            console.error('留言保存失败:', error);
+        });
     
     return false;
 }
@@ -695,11 +728,515 @@ function handleLogin(event) {
                     showToast('该手机号未注册，请先注册！');
                 }
             })
+    } else {
+        hideLoading();
+        showToast('请输入有效的手机号或邮箱地址！');
+    }
+    
+    return false;
+}
+
+// 处理注册
+function handleRegister(event) {
+    event.preventDefault();
+    const account = document.getElementById('registerAccount').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    // 验证密码
+    if (password !== confirmPassword) {
+        showToast('两次输入的密码不一致，请重新输入！');
+        return false;
+    }
+    
+    // 验证账号格式（邮箱或手机号）
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(account);
+    const isPhone = /^\d{10,15}$/.test(account);
+    
+    if (!isEmail && !isPhone) {
+        showToast('请输入有效的手机号或邮箱地址！');
+        return false;
+    }
+    
+    showLoading();
+    
+    if (isEmail) {
+        // 使用邮箱注册
+        auth.createUserWithEmailAndPassword(account, password)
+            .then((userCredential) => {
+                // 注册成功
+                const user = userCredential.user;
+                
+                // 保存额外用户信息到数据库
+                return database.ref('users/' + user.uid).set({
+                    email: account,
+                    registerDate: new Date().toISOString()
+                });
+            })
+            .then(() => {
+                hideLoading();
+                closeModal('register');
+                showToast('注册成功！');
+                
+                // 自动切换到登录页
+                setTimeout(() => {
+                    showModal('login');
+                    document.getElementById('loginAccount').value = account;
+                }, 1500);
+            })
             .catch((error) => {
                 hideLoading();
-                showToast('登录失败，请稍后重试！');
+                showToast(getErrorMessage(error));
+            });
+    } else if (isPhone) {
+        // 使用手机号注册
+        // 先检查手机号是否已注册
+        database.ref('phoneUsers').orderByChild('phone').equalTo(account).once('value')
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    // 手机号已注册
+                    hideLoading();
+                    showToast('该手机号已注册，请直接登录！');
+                    
+                    // 切换到登录页
+                    setTimeout(() => {
+                        switchForm('login');
+                        document.getElementById('loginAccount').value = account;
+                    }, 1500);
+                } else {
+                    // 手机号未注册，创建新用户
+                    const newUserRef = database.ref('phoneUsers').push();
+                    const uid = newUserRef.key;
+                    
+                    newUserRef.set({
+                        phone: account,
+                        password: password,
+                        registerDate: new Date().toISOString(),
+                        uid: uid
+                    })
+                    .then(() => {
+                        hideLoading();
+                        closeModal('register');
+                        showToast('注册成功！');
+                        
+                        // 自动切换到登录页
+                        setTimeout(() => {
+                            showModal('login');
+                            document.getElementById('loginAccount').value = account;
+                        }, 1500);
+                    })
+                    .catch((error) => {
+                        hideLoading();
+                        showToast('注册失败，请稍后重试！');
+                        console.error(error);
+                    });
+                }
+            })
+            .catch((error) => {
+                hideLoading();
+                showToast('注册失败，请稍后重试！');
                 console.error(error);
             });
+    }
+    
+    return false;
+}
+
+// 更新用户界面
+function updateUserUI(userData) {
+    const userMenu = document.getElementById('userMenu');
+    
+    if (userData || auth.currentUser) {
+        // 已登录状态
+        const user = userData || auth.currentUser;
+        let displayName = user.email || user.phone || user.phoneNumber || '用户';
+        
+        // 如果是谷歌登录用户，优先使用谷歌账号的显示名称
+        if (user.displayName) {
+            displayName = user.displayName;
+        }
+        
+        // 如果有头像，显示头像
+        let userAvatar = '';
+        if (user.photoURL) {
+            userAvatar = `<img src="${user.photoURL}" alt="avatar" class="user-avatar">`;
+        }
+        
+        userMenu.innerHTML = `
+            <div class="user-info">
+                ${userAvatar}
+                <span>欢迎，${displayName}</span>
+            </div>
+            <a href="#" onclick="logout(); return false;">退出登录</a>
+        `;
+    } else {
+        // 未登录状态
+        userMenu.innerHTML = `
+            <a href="#" onclick="showModal('login'); return false;">Login</a>
+            <a href="#" onclick="showModal('register'); return false;">Register</a>
+        `;
+    }
+}
+
+// 退出登录
+function logout() {
+    // 清除本地存储的手机用户信息
+    localStorage.removeItem('phoneUser');
+    
+    // Firebase退出登录
+    auth.signOut()
+        .then(() => {
+            updateUserUI(null);
+            showToast('已退出登录！');
+        })
+        .catch((error) => {
+            console.error('退出登录失败:', error);
+        });
+}
+
+// 获取错误信息
+function getErrorMessage(error) {
+    switch (error.code) {
+        case 'auth/email-already-in-use':
+            return '该邮箱已被注册，请直接登录！';
+        case 'auth/invalid-email':
+            return '邮箱格式不正确！';
+        case 'auth/weak-password':
+            return '密码强度太弱，请使用更复杂的密码！';
+        case 'auth/user-not-found':
+            return '该账号不存在，请先注册！';
+        case 'auth/wrong-password':
+            return '密码错误，请重试！';
+        default:
+            return '操作失败，请稍后重试！';
+    }
+}
+
+// 显示加载中
+function showLoading() {
+    // 创建加载元素
+    if (!document.getElementById('loadingOverlay')) {
+        const loading = document.createElement('div');
+        loading.id = 'loadingOverlay';
+        loading.innerHTML = '<div class="loading-spinner"></div>';
+        document.body.appendChild(loading);
+    }
+    document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
+// 隐藏加载中
+function hideLoading() {
+    const loading = document.getElementById('loadingOverlay');
+    if (loading) {
+        loading.style.display = 'none';
+    }
+}
+
+// 显示提示消息
+function showToast(message) {
+    // 创建toast元素
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    
+    // 添加到页面
+    document.body.appendChild(toast);
+    
+    // 显示toast
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    
+    // 3秒后隐藏并移除
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+// 初始化谷歌登录
+function initGoogleLogin() {
+    // 创建谷歌登录提供者
+    window.googleProvider = new firebase.auth.GoogleAuthProvider();
+    // 添加登录范围，获取用户的基本资料
+    window.googleProvider.addScope('profile');
+    window.googleProvider.addScope('email');
+}
+
+// 处理谷歌登录
+function handleGoogleLogin() {
+    showLoading();
+    
+    // 检查是否支持弹出窗口
+    const isPopupSupported = window.open('', '_blank', 'width=1,height=1');
+    
+    if (isPopupSupported) {
+        isPopupSupported.close();
+        // 使用弹出窗口方式登录
+        auth.signInWithPopup(window.googleProvider)
+            .then(handleGoogleLoginSuccess)
+            .catch(handleGoogleLoginError);
+    } else {
+        // 如果弹出窗口被阻止，使用重定向方式
+        auth.signInWithRedirect(window.googleProvider)
+            .catch(handleGoogleLoginError);
+    }
+}
+
+// 处理谷歌登录成功
+function handleGoogleLoginSuccess(result) {
+    // 如果是从重定向过来的，result可能为null
+    if (!result) {
+        hideLoading();
+        return;
+    }
+
+    const user = result.user;
+    // 安全地获取 isNewUser
+    const isNewUser = result.additionalUserInfo ? result.additionalUserInfo.isNewUser : false;
+    
+    // 保存用户信息到数据库
+    return database.ref('users/' + user.uid).update({
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        lastLogin: new Date().toISOString(),
+        provider: 'google'
+    }).then(() => {
+        hideLoading();
+        
+        // 关闭所有模态框
+        closeModal('login');
+        closeModal('register');
+        
+        // 显示欢迎消息
+        if (isNewUser) {
+            showToast('欢迎使用谷歌账号注册并登录！');
+        } else {
+            showToast('谷歌账号登录成功！');
+        }
+        
+        // 更新UI
+        updateUserUI(user);
+    });
+}
+
+
+// 在页面加载完成后检查重定向结果
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+    
+    // 检查是否有重定向登录结果
+    auth.getRedirectResult()
+        .then(handleGoogleLoginSuccess)
+        .catch(handleGoogleLoginError);
+});
+
+// 更新通用文本
+function updateCommonText(texts) {
+    // 登录/注册按钮
+    const loginLink = document.querySelector('#userMenu a[onclick*="login"]');
+    const registerLink = document.querySelector('#userMenu a[onclick*="register"]');
+    if (loginLink) loginLink.textContent = texts.login;
+    if (registerLink) registerLink.textContent = texts.register;
+    
+    // 客服文本
+    const customerService = document.querySelector('.customer-service .desktop-only');
+    if (customerService) customerService.textContent = texts.customerService;
+    
+    // 移动端菜单标题
+    const menuTitle = document.querySelector('.mobile-menu-header h3');
+    if (menuTitle) menuTitle.textContent = texts.menu;
+    
+    // 页脚文本
+    const contactUsTitle = document.querySelector('.footer-section h3:first-child');
+    const aboutUsTitle = document.querySelector('.footer-section h3:last-child');
+    if (contactUsTitle) contactUsTitle.textContent = texts.contactUs;
+    if (aboutUsTitle) aboutUsTitle.textContent = texts.aboutUs;
+    
+    // 登录模态框
+    const loginTitle = document.querySelector('#loginModal h2');
+    const loginButton = document.querySelector('#loginForm .btn-primary');
+    const noAccountText = document.querySelector('#loginForm .switch-form span');
+    const registerNowLink = document.querySelector('#loginForm .switch-form a');
+    const loginAccount = document.querySelector('#loginAccount');
+    const loginPassword = document.querySelector('#loginPassword');
+    const rememberMe = document.querySelector('label[for="rememberMe"]');
+    
+    if (loginTitle) loginTitle.textContent = texts.login;
+    if (loginButton) loginButton.textContent = texts.login;
+    if (noAccountText) noAccountText.textContent = texts.noAccount;
+    if (registerNowLink) registerNowLink.textContent = texts.register;
+    if (loginAccount) loginAccount.placeholder = texts.phoneEmail;
+    if (loginPassword) loginPassword.placeholder = texts.password;
+    if (rememberMe) rememberMe.textContent = texts.rememberMe;
+    
+    // 注册模态框
+    const registerTitle = document.querySelector('#registerModal h2');
+    const registerButton = document.querySelector('#registerForm .btn-primary');
+    const haveAccountText = document.querySelector('#registerForm .switch-form span');
+    const signInNowLink = document.querySelector('#registerForm .switch-form a');
+    const registerAccount = document.querySelector('#registerAccount');
+    const registerPassword = document.querySelector('#registerPassword');
+    const confirmPassword = document.querySelector('#confirmPassword');
+    
+    if (registerTitle) registerTitle.textContent = texts.register;
+    if (registerButton) registerButton.textContent = texts.register;
+    if (haveAccountText) haveAccountText.textContent = texts.haveAccount;
+    if (signInNowLink) signInNowLink.textContent = texts.signInNow;
+    if (registerAccount) registerAccount.placeholder = texts.phoneEmail;
+    if (registerPassword) registerPassword.placeholder = texts.password;
+    if (confirmPassword) confirmPassword.placeholder = texts.confirmPassword;
+    
+    // 客服模态框
+    const customerTitle = document.querySelector('#customerModal h2');
+    const contactInfo = document.querySelector('#contactInfo');
+    const messageContent = document.querySelector('#messageContent');
+    const submitButton = document.querySelector('#messageForm .btn-primary');
+    const customerPhone = document.querySelector('#customerModal .customer-info p:nth-child(1)');
+    const customerEmail = document.querySelector('#customerModal .customer-info p:nth-child(2)');
+    const customerWhatsapp = document.querySelector('#customerModal .customer-info p:nth-child(3)');
+    
+    if (customerTitle) customerTitle.textContent = texts.contactUs;
+    if (contactInfo) contactInfo.placeholder = texts.phoneEmail;
+    if (messageContent) messageContent.placeholder = texts.describeQuestion;
+    if (submitButton) submitButton.textContent = texts.submitMessage;
+    if (customerPhone) customerPhone.innerHTML = `${texts.customerServiceHotline}<span id="customerPhone"></span>`;
+    if (customerEmail) customerEmail.innerHTML = `${texts.mail}<span id="customerEmail"></span>`;
+    if (customerWhatsapp) customerWhatsapp.innerHTML = `${texts.whatsapp}<span id="customerWhatsapp"></span>`;
+}
+
+// 更新产品详情页文本
+function updateProductDetailText(texts) {
+    // 规格参数标题
+    const specsTitle = document.querySelector('.specs-title');
+    if (specsTitle) specsTitle.textContent = texts.specifications;
+    
+    // 相关推荐标题
+    const relatedTitle = document.querySelector('.related-title');
+    if (relatedTitle) relatedTitle.textContent = texts.related;
+}
+
+// 更新首页文本
+function updateHomeText(texts) {
+    // 产品区域标题
+    const sectionTitle = document.querySelector('.section-title');
+    if (sectionTitle) sectionTitle.textContent = texts.featuredProducts;
+    
+    // 其他首页特定文本...
+}
+
+// 在页面加载完成后初始化语言
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化导航菜单
+    initNavMenu();
+    
+    // 初始化页脚
+    initFooter();
+    
+    // 初始化客服信息
+    initCustomerService();
+    
+    // 设置移动端菜单切换
+    setupMobileMenu();
+    
+    // 设置用户菜单
+    setupUserMenu();
+    
+    // 初始化用户状态
+    initUserState();
+        // 初始化谷歌登录
+        initGoogleLogin();
+    
+        // 检查是否有重定向登录结果
+        auth.getRedirectResult()
+            .then(handleGoogleLoginSuccess)
+            .catch(handleGoogleLoginError);
+});
+
+// 更新已登录用户的UI
+function updateUIForLoggedInUser() {
+    if (!currentUser) return;
+    
+    // 更新用户菜单
+    const userMenu = document.getElementById('userMenu');
+    if (userMenu) {
+        userMenu.innerHTML = `
+            <div class="user-info">
+                <span>欢迎，${currentUser.account}</span>
+            </div>
+            <a href="#" onclick="handleLogout(); return false;">退出登录</a>
+        `;
+    }
+}
+
+// 处理登录
+function handleLogin(event) {
+    event.preventDefault();
+    const account = document.getElementById('loginAccount').value;
+    const password = document.getElementById('loginPassword').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
+    
+    // 判断是邮箱还是手机号
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(account);
+    const isPhone = /^\d{10,15}$/.test(account);
+    
+    showLoading();
+    
+    if (isEmail) {
+        // 使用邮箱登录
+        auth.signInWithEmailAndPassword(account, password)
+            .then((userCredential) => {
+                // 登录成功
+                hideLoading();
+                closeModal('login');
+                showToast('登录成功！');
+            })
+            .catch((error) => {
+                // 登录失败
+                hideLoading();
+                showToast(getErrorMessage(error));
+            });
+    } else if (isPhone) {
+        // 使用手机号登录需要先验证手机号
+        // 这里简化处理，实际应该有验证码流程
+        // 先查询是否有对应手机号的用户
+        database.ref('phoneUsers').orderByChild('phone').equalTo(account).once('value')
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    // 找到手机号对应的用户
+                    let userData;
+                    snapshot.forEach((childSnapshot) => {
+                        userData = childSnapshot.val();
+                    });
+                    
+                    // 验证密码
+                    if (userData && userData.password === password) {
+                        // 登录成功
+                        auth.signInAnonymously().then(() => {
+                            // 使用匿名登录后，将用户信息存储在本地
+                            localStorage.setItem('phoneUser', JSON.stringify({
+                                phone: account,
+                                uid: userData.uid
+                            }));
+                            hideLoading();
+                            closeModal('login');
+                            showToast('登录成功！');
+                            updateUserUI({ phone: account });
+                        });
+                    } else {
+                        // 密码错误
+                        hideLoading();
+                        showToast('密码错误，请重试！');
+                    }
+                } else {
+                    // 未找到用户
+                    hideLoading();
+                    showToast('该手机号未注册，请先注册！');
+                }
+            })
     } else {
         hideLoading();
         showToast('请输入有效的手机号或邮箱地址！');
@@ -913,17 +1450,3 @@ function showToast(message) {
         }, 300);
     }, 3000);
 }
-
-// 监听认证状态变化
-auth.onAuthStateChanged((user) => {
-    // 检查是否有手机用户登录
-    const phoneUser = JSON.parse(localStorage.getItem('phoneUser'));
-    
-    if (user || phoneUser) {
-        // 用户已登录
-        updateUserUI(user || phoneUser);
-    } else {
-        // 用户未登录
-        updateUserUI(null);
-    }
-});

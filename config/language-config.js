@@ -1,8 +1,5 @@
-// 多语言配置
 const languageConfig = {
-    // 英文配置
     en: {
-        // 通用文本
         common: {
             login: "Login",
             register: "Register",
@@ -22,22 +19,21 @@ const languageConfig = {
             customerServiceHotline: "Customer Service Hotline:",
             mail: "Mail:",
             whatsapp: "WhatsApp:",
+            loginWith: 'Or login with:',
+            registerWith: 'Or register with:',
+            google: 'Google'
         },
-        // 产品详情页文本
         productDetail: {
             specifications: "Specifications",
             related: "Related Products",
             description: "Description",
         },
-        // 首页文本
         home: {
             featuredProducts: "Featured Products",
             viewMore: "View More",
         }
     },
-    // 中文配置
     zh: {
-        // 通用文本
         common: {
             login: "登录",
             register: "注册",
@@ -57,14 +53,15 @@ const languageConfig = {
             customerServiceHotline: "客服热线:",
             mail: "邮箱:",
             whatsapp: "WhatsApp:",
+            loginWith: '或使用以下方式登录:',
+            registerWith: '或使用以下方式注册:',
+            google: '谷歌'
         },
-        // 产品详情页文本
         productDetail: {
             specifications: "规格参数",
             related: "相关推荐",
             description: "产品描述",
         },
-        // 首页文本
         home: {
             featuredProducts: "精选产品",
             viewMore: "查看更多",
