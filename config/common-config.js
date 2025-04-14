@@ -1,12 +1,12 @@
 // 网站公共配置
 const commonConfig = {
     // 网站标题
-    siteTitle: "GetPhoneHub4444",
+    siteTitle: "GetPhone",
     
     // Logo配置
     logo: {
         icon: "fas fa-mobile-alt", // Font Awesome图标
-        text: "GetPhoneHub555"
+        text: "GetPhone"
     },
     
     // 导航菜单
