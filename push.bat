@@ -1,5 +1,9 @@
 @echo off
 chcp 65001
+
+echo 正在设置仓库地址...
+git remote set-url origin https://github.com/807280597/phone.git
+
 echo 正在取消代理设置...
 git config --global --unset http.proxy
 git config --global --unset https.proxy
